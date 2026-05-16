@@ -27,5 +27,6 @@ RTE/
 
 *.sct
 *.icf
+*.lst
 
 *.txt

@@ -42,7 +42,7 @@ M2006* motors[4] = {&GripMotor, &CatchMotor, &BackMotor, &SliderMotor};
 
 uint8_t M2006_Init(void)
 {
-    PID speed_cfg(0.1f, 0.0f, 0.0f, 4000.0f, 2500.0f);
+    PID speed_cfg(0.08f, 0.0f, 0.0f, 4000.0f, 4000.0f);
     PID pos_cfg(0.02f, 0.0f, 0.0f, 1000.0f, 2000.0f);
     
     GripMotor.PID_Config(pos_cfg, speed_cfg);
@@ -54,13 +54,13 @@ uint8_t M2006_Init(void)
     uint32_t lastTicks[4] = {0, 0, 0, 0};  // Start time of each stage
     
     // Make all of the motor rotate    
-	motors[0] -> SpeedMode(3000);
+	motors[0] -> SpeedMode(4000);
 	lastTicks[0] = HAL_GetTick();
-	motors[1] -> SpeedMode(-3000);
+	motors[1] -> SpeedMode(-4000);
 	lastTicks[1] = HAL_GetTick();
-	motors[2] -> SpeedMode(-3000);
+	motors[2] -> SpeedMode(-4000);
 	lastTicks[2] = HAL_GetTick();
-	motors[3] -> SpeedMode(3000);
+	motors[3] -> SpeedMode(4000);
 	lastTicks[3] = HAL_GetTick();
 
     uint8_t totalFinished = 0;
@@ -79,7 +79,7 @@ uint8_t M2006_Init(void)
             // Find minimum boundary
             if (stages[i] == 0) {
                 // Detect after 300ms, waiting for the launch of motor
-                if ((currentTick - lastTicks[i] > 300) && (absVel < 15)) {
+                if ((currentTick - lastTicks[i] > 1000) && (absVel < 5)) {
 					motors[i] -> SpeedMode(0);
                     lastTicks[i] = currentTick;
                     stages[i] = 1;
@@ -98,6 +98,7 @@ uint8_t M2006_Init(void)
 	for (uint8_t i = 0; i < 4; i++)
 	{
 		motors[i] -> SetZeroPoint();
+		motors[i] -> SpeedMode(0);
 	}
 	
 	UART_printf(&huart2, "M2006 initialized in parallel.\r\n");
@@ -135,7 +136,7 @@ void Motor_Init(void)
 
 /*This is the register of motor*/
 //M2006* motors[4] = {&GripMotor, &CatchMotor, &BackMotor, &SliderMotor};
-float targetPositions[4] = {-360 * 7.0f, 360 * 4.0f, 360 * 4.0f, -360 * 4.0f};
+float targetPositions[4] = {-360 * 6.0f, 360 * 4.0f, 360 * 4.0f, -360 * 4.0f};
 uint16_t targetSpeeds[4] = {8000, 5000, 5000, 5000};
 void Command_parsing(uint8_t cmd)
 {
@@ -159,9 +160,9 @@ void Command_parsing(uint8_t cmd)
 	
 	DM_cmd = (cmd >> 6);
 	if (DM_cmd == 1){
-		Joint.SpeedMode(-0.01);
+		Joint.SpeedMode(-0.3);
 	}else if (DM_cmd == 2){
-		Joint.SpeedMode(0.01);
+		Joint.SpeedMode(0.3);
 	}else{
 		Joint.SpeedMode(0);
 	}
@@ -191,8 +192,8 @@ void USART2_Task(void)
 			
 			case 1: // Medium position
 				trigger_times++;
-				L_arm.PosSpeedMode(-40*25, 1/19.2 * 5);  
-				R_arm.PosSpeedMode(40*25, 1/19.2 * 5);
+				L_arm.PosSpeedMode(-55*25, 1/19.2 * 5);  
+				R_arm.PosSpeedMode(55*25, 1/19.2 * 5);
 				break;
 			
 			case 2: // High position
