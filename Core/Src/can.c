@@ -55,11 +55,11 @@ void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
-  if (CAN_Filter_Config(&hcan1, 0, CAN_RX_FIFO0, 0x202) != HAL_OK)
+  if (CAN_Filter_Config(&hcan1, 0, CAN_RX_FIFO0, 0x799) != HAL_OK)
   {
     Error_Handler();
   }
-  if (CAN_Filter_Config(&hcan1, 1, CAN_RX_FIFO0, 0x203) != HAL_OK)
+  if (CAN_Filter_Config(&hcan1, 1, CAN_RX_FIFO0, 0x788) != HAL_OK)
   {
     Error_Handler();
   }
@@ -164,9 +164,9 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
     /* CAN1 interrupt Init */
-    HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
-    HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 0, 1);
+    HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 1, 1);
     HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
   /* USER CODE BEGIN CAN1_MspInit 1 */
 

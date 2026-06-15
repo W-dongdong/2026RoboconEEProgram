@@ -16,6 +16,7 @@ extern uint8_t TIM1_Flag;
 
 /*Function*/
 HAL_StatusTypeDef TIM_Start(TIM_HandleTypeDef *htim);
+void TIM_SetCompare(TIM_HandleTypeDef *htim, uint16_t value);
 
 #ifdef __cplusplus
 }

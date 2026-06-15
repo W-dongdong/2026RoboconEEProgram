@@ -2,10 +2,10 @@
 
 Mecanum_Chassis	R2_Chassis(0.53, 0.55, 5);
 /*---------DM3519--------*/
-DM3519 L_arm(&hcan1, 5);
-DM3519 R_arm(&hcan1, 6);
-DM3519 BaseSlider(&hcan1, 8);
-DM3519 Joint(&hcan1, 7);
+DM3519 L_arm(&hcan1, 5, 0x700);
+DM3519 R_arm(&hcan1, 6, 0x700); // 这里的接收需要改成对应ID
+DM3519 BaseSlider(&hcan1, 8, 0x788);
+DM3519 Joint(&hcan1, 7, 0x788);
 
 /*---------M2006----------*/
 M2006 CatchMotor(&hcan2, 1);
@@ -16,11 +16,6 @@ M2006 SliderMotor(&hcan2, 4);
 uint8_t Chassis_Init(void)
 {
 	uint8_t state = 0;
-	/*Chassis Initialization*/
-	R2_Chassis.Wheel1.m_ID = 1;
-	R2_Chassis.Wheel2.m_ID = 2;
-	R2_Chassis.Wheel3.m_ID = 3;
-	R2_Chassis.Wheel4.m_ID = 4;
 	  
 	
 	state += R2_Chassis.Wheel1.SetMotorState(enable);
@@ -42,65 +37,15 @@ M2006* motors[4] = {&GripMotor, &CatchMotor, &BackMotor, &SliderMotor};
 
 uint8_t M2006_Init(void)
 {
-    PID speed_cfg(0.08f, 0.0f, 0.0f, 4000.0f, 4000.0f);
+    PID speed_cfg(0.08f, 0.0f, 0.01f, 4000.0f, 4000.0f);
     PID pos_cfg(0.02f, 0.0f, 0.0f, 1000.0f, 2000.0f);
     
     GripMotor.PID_Config(pos_cfg, speed_cfg);
     CatchMotor.PID_Config(pos_cfg, speed_cfg);
     BackMotor.PID_Config(pos_cfg, speed_cfg);
     SliderMotor.PID_Config(pos_cfg, speed_cfg);
-    
-    uint8_t stages[4] = {0, 0, 0, 0};      // 0: Processing; 1:Finished
-    uint32_t lastTicks[4] = {0, 0, 0, 0};  // Start time of each stage
-    
-    // Make all of the motor rotate    
-	motors[0] -> SpeedMode(4000);
-	lastTicks[0] = HAL_GetTick();
-	motors[1] -> SpeedMode(-4000);
-	lastTicks[1] = HAL_GetTick();
-	motors[2] -> SpeedMode(-4000);
-	lastTicks[2] = HAL_GetTick();
-	motors[3] -> SpeedMode(4000);
-	lastTicks[3] = HAL_GetTick();
-
-    uint8_t totalFinished = 0;
-
-    while (totalFinished < 4) {
-        uint32_t currentTick = HAL_GetTick();
-
-        for (uint8_t i = 0; i < 4; i++) {
-            // Whether the initialization is completed
-            if (stages[i] == 1) {
-                continue;
-            }
-
-            float absVel = (motors[i]->m_Vel >= 0) ? motors[i]->m_Vel : -motors[i]->m_Vel;
-
-            // Find minimum boundary
-            if (stages[i] == 0) {
-                // Detect after 300ms, waiting for the launch of motor
-                if ((currentTick - lastTicks[i] > 1000) && (absVel < 5)) {
-					motors[i] -> SpeedMode(0);
-                    lastTicks[i] = currentTick;
-                    stages[i] = 1;
-					totalFinished ++;
-                }
-            }
-        }
-        HAL_Delay(1);
-    }
-	/*Rotate back little bit*/
-	motors[0] -> PosSpeedMode(-10, 3000);
-	motors[1] -> PosSpeedMode(10, 3000);
-	motors[2] -> PosSpeedMode(10, 3000);
-	motors[3] -> PosSpeedMode(-10, 3000);
 	
-	for (uint8_t i = 0; i < 4; i++)
-	{
-		motors[i] -> SetZeroPoint();
-		motors[i] -> SpeedMode(0);
-	}
-	
+
 	UART_printf(&huart2, "M2006 initialized in parallel.\r\n");
 	return 1;
 }
@@ -160,29 +105,29 @@ void Command_parsing(uint8_t cmd)
 	
 	DM_cmd = (cmd >> 6);
 	if (DM_cmd == 1){
-		Joint.SpeedMode(-0.3);
+		Joint.PosSpeedMode(3250, 0.5);
 	}else if (DM_cmd == 2){
-		Joint.SpeedMode(0.3);
+		Joint.PosSpeedMode(400, 0.3);
 	}else{
-		Joint.SpeedMode(0);
+		Joint.PosSpeedMode(0, 0.5);
 	}
 }
 
-void USART2_Task(void)
+void ManualMode(void)
 {
 	float x; float y; float w;
-	static uint8_t mod = 0; static uint8_t last_mod = 0; uint8_t cmd;
+	static uint8_t mod = 0; static uint8_t last_mod = 0; uint8_t cmd = 0;
 	static uint8_t trigger_times = 0;
 	
 	host_Msg_parsing(&x, &y, &w, &mod, &cmd);
-	UART_printf(&huart2, "x:%2f y:%2f w:%2f mod:%d cmd:%d\r\n", x, y, w, mod, cmd);
+	UART_DMA_printf(&huart2, "x:%2f y:%2f w:%2f mod:%d cmd:%d\r\n", x, y, w, mod, cmd);
 
 	R2_Chassis.move(x, y, w);
 
 	/*------------------------------------------------*/
-	if ((mod - last_mod) == 1) // up trigger
-	{
-		switch (trigger_times)
+//	if ((mod - last_mod) == 1) // up trigger
+//	{
+		switch (mod)
 		{
 			case 0: // Horizontal position
 				trigger_times++;
@@ -190,44 +135,56 @@ void USART2_Task(void)
 				R_arm.PosSpeedMode(0, 1/19.2 * 10); 
 				break;
 			
-			case 1: // Medium position
+			case 1: // Get spear position
 				trigger_times++;
-				L_arm.PosSpeedMode(-55*25, 1/19.2 * 5);  
-				R_arm.PosSpeedMode(55*25, 1/19.2 * 5);
+				L_arm.PosSpeedMode(-70*25, 1/19.2 * 5);  
+				R_arm.PosSpeedMode(70*25, 1/19.2 * 5);
 				break;
 			
-			case 2: // High position
+			case 2: // Match position
 				trigger_times = 0;
-				L_arm.PosSpeedMode(-90*25, 1/19.2 * 5);  
-				R_arm.PosSpeedMode(90*25, 1/19.2 * 5);
+				L_arm.PosSpeedMode(-31*25, 1/19.2 * 5);  
+				R_arm.PosSpeedMode(31*25, 1/19.2 * 5);
 				break;
 			default:
 				break;
 		}
-	}
-	last_mod = mod;
+//	}
+//	last_mod = mod;
 	/*------------------------------------------------*/
 	Command_parsing(cmd);
 }
 
 void Test_Function(void)
 {
+ 
+}
 
-} 
-
-void CAN1_Task(void)
+void CAN1_Task(void) 
 {
 	/*ATTENTION!!!printf is time-costy, do not use it in practical control, especially for position control*/
 	/*Remember the optimization is ENABLE (on level 1)*/
+//	UART_printf(&huart2, "BasePos:%f\r\n", BaseSlider.m_Pos); 
+	if (BaseSlider.ParseFeedback(&Can1_Msg))
+	{
+//		UART_DMA_printf(&huart2, "Base: %2f\r\n", BaseSlider.m_Pos);
+	}
 }
- 
+
 void CAN2_Task(void)
 {
 	M2006::ControlLoopUpdate(&Can2_Msg);
-} 
+}
 
+uint8_t DM_times = 0;
 void TIM1_Task(void)
 {
 	M2006::SendGroup(&hcan2, 0x200);
+	if (DM_times == 50)
+	{
+//		BaseSlider.SetMotorState(enable);
+		DM_times = 0;
+	}
+	DM_times ++;
 }
 

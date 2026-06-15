@@ -13,27 +13,28 @@ typedef enum
 class DM3519{
 private:
 	CAN_HandleTypeDef* m_hcan;
-
+	
+public:
 	uint8_t  m_Error;		// Error flag
-	uint16_t m_Pos;			// Encoder
-	int16_t  m_Vel;			// Velocity
+	float	 m_Pos;			// Encoder
+	float	 m_Vel;			// Velocity
 	uint16_t m_Torque;		// Torque
 	uint8_t  m_T_MOS;		// Average MOS temperature
 	uint8_t  m_T_Rotor;    
 	float	 m_redRatio;	// Reduction Ratio
-                       
-	
-public:
-	uint8_t  m_ID;			// Controller ID
+
+	uint8_t  m_TxID;		// Controller ID
+	uint16_t m_MST_ID;		// ID of the CAN message that the motor driver return
 	float	 m_SetSpeed;	// Setted target speed of output shaft (rad / s)
 	float 	 m_SetPos;		// Setted target position of output shaft (degree)
 
-	DM3519(CAN_HandleTypeDef* hcan, uint16_t ID);
+	DM3519(CAN_HandleTypeDef* hcan, uint8_t TxID, uint16_t MST_ID);
 
 	uint8_t ParseFeedback(CanMsg* RxMsg);
 	uint8_t SetMotorState(MotorState State);
 	uint8_t SpeedMode(float target_rads);
 	uint8_t PosSpeedMode(float Pos, float Speed);
+	float 	uint_to_float(int x_int, float x_min, float x_max, int bits);
 };
 
 #endif

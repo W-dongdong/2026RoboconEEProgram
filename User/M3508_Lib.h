@@ -15,7 +15,7 @@ private:
 	int16_t SpeedModeCalculation(void);
     int16_t PosSpeedModeCalculation(void);
 	static  M3508*  MsgAssign(CanMsg* RxMsg);
-	static  M3508* Motor_Regester[8];
+	static  M3508*	Motor_Regester[8];
 
 public:
 	static uint8_t SendGroup(CAN_HandleTypeDef* hcan, uint16_t identifier);
