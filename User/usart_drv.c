@@ -167,14 +167,14 @@ WHen you use it you should rewrite it after the main function
 */
 //void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 //{
-//	
+//		
 //}
 
 
 /*UART printf function*/
 int fputc(int ch, FILE *f)
 {
-  HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 10);
+  HAL_UART_Transmit(&huart6, (uint8_t *)&ch, 1, 10);
   return ch;
 }
 

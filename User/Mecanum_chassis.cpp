@@ -5,10 +5,10 @@ Mecanum_Chassis::Mecanum_Chassis(float length, float width, float Wheel_Radius)
       m_width(width),
       m_Vx(0), m_Vy(0), m_W(0),
 	  m_Wheel_Radius(Wheel_Radius),
-	  Wheel1(&hcan1, 0),
-	  Wheel2(&hcan1, 0),
-	  Wheel3(&hcan1, 0),
-	  Wheel4(&hcan1, 0)
+	  Wheel1(&hcan1, 2, 0x700),
+	  Wheel2(&hcan1, 4, 0x700),
+	  Wheel3(&hcan1, 3, 0x700),
+	  Wheel4(&hcan1, 1, 0x700)
 {
 }
 
@@ -16,10 +16,10 @@ Mecanum_Chassis::Mecanum_Chassis(float length, float width, float Wheel_Radius)
 // NOTE: The unit of Vx Vy should be m/s, W should be rad/s
 uint8_t Mecanum_Chassis::move(float Vx, float Vy, float W)
 {
-	float wheel1_rotate = (-Vx + Vy + W*(m_length + m_width))/m_Wheel_Radius;
-	float wheel2_rotate = (-Vx - Vy + W*(m_length + m_width))/m_Wheel_Radius;
-	float wheel3_rotate = ( Vx - Vy + W*(m_length + m_width))/m_Wheel_Radius;
-	float wheel4_rotate = ( Vx + Vy + W*(m_length + m_width))/m_Wheel_Radius;
+	float wheel1_rotate = (-Vx - Vy + W*(-m_length - m_width)/2)/m_Wheel_Radius;
+	float wheel4_rotate = (Vx - Vy - W*(m_length + m_width)/2)/m_Wheel_Radius;
+	float wheel3_rotate = (-Vx - Vy + W*(m_length + m_width)/2)/m_Wheel_Radius;
+	float wheel2_rotate = (Vx - Vy - W*(-m_length - m_width)/2)/m_Wheel_Radius;
 	
 	uint8_t state1 = Wheel1.SpeedMode(wheel1_rotate);
 	uint8_t state2 = Wheel2.SpeedMode(wheel2_rotate);

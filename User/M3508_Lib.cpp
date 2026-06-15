@@ -36,6 +36,7 @@ static CanMsg M3508_Group2 = {0x1FF, CAN_ID_STD, CAN_RTR_DATA, 8, {0}};
 // Regester of motor
 M3508* M3508::Motor_Regester[8] = {NULL};
 
+
 M3508::M3508(CAN_HandleTypeDef* hcan, uint8_t ID)
     : m_cascade_frq(3),
 	  m_hcan(hcan),

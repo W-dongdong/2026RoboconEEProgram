@@ -23,13 +23,14 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-
+#include "usart_drv.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "DM3519_Lib.h"
 #include "Mecanum_Chassis.h"
 #include "host_parsing.h"
 #include "task.h"
+#include "ServoMotor_lib.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +52,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
 
 /* USER CODE END PV */
 
@@ -100,20 +100,24 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM1_Init();
   MX_CAN2_Init();
+  MX_TIM4_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
   Motor_Init();
-  printf("Robot initialization is completed!\r\n");
+  UART_DMA_printf(&huart6, "Robot initialization is completed!\r\n");
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE   */
   while (1)
   {
+	
 	/*---------USART Task----------*/
-	if (usart2_rx_flag == 1)
+	if (usart6_rx_flag == 1)
 	{
-		usart2_rx_flag = 0;
-		USART2_Task();
+		usart6_rx_flag = 0;
+		ManualMode();
 	}
 	
 	/*---------CAN1 Task----------*/

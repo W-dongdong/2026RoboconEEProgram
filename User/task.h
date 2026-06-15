@@ -10,11 +10,25 @@
 #include "usart_drv.h"
 
 void Motor_Init(void);
-void USART2_Task(void);
+void ManualMode(void);
 void CAN1_Task(void);
 void CAN2_Task(void);
 void TIM1_Task(void);
 
 void Test_Function(void);
+
+
+extern Mecanum_Chassis R2_Chassis;
+/*---------DM3519--------*/
+extern DM3519 L_arm;
+extern DM3519 R_arm;
+extern DM3519 BaseSlider;
+extern DM3519 Joint;
+
+/*---------M2006----------*/
+extern M2006 CatchMotor;
+extern M2006 GripMotor;
+extern M2006 BackMotor;
+extern M2006 SliderMotor;
 
 #endif

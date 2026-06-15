@@ -69,7 +69,10 @@ extern CAN_HandleTypeDef hcan2;
 extern TIM_HandleTypeDef htim1;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart2_tx;
+extern DMA_HandleTypeDef hdma_usart6_rx;
+extern DMA_HandleTypeDef hdma_usart6_tx;
 extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart6;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -288,29 +291,43 @@ void TIM1_UP_TIM10_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-  if(__HAL_UART_GET_FLAG(&huart2, UART_FLAG_IDLE) != RESET)
-  {
-    __HAL_UART_CLEAR_IDLEFLAG(&huart2);
-    
-    HAL_UART_DMAStop(&huart2);	//Stop DMA
-    
-    usart2_rx_len = USART2_RX_BUF_LEN - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);		//Get the rx_data length
-	  
-	/*result = (condition) ? (excute if condition is true) : (excute if condition is false);*/
-    uint16_t copy_len = (usart2_rx_len < PROCESS_AREA_LEN - 1) ? usart2_rx_len : (PROCESS_AREA_LEN - 1);//Prevent overflow
-    memcpy(process_area, usart2_rx_buf, copy_len);//Copy data to process area
+//  if(__HAL_UART_GET_FLAG(&huart2, UART_FLAG_IDLE) != RESET)
+//  {
+//    __HAL_UART_CLEAR_IDLEFLAG(&huart2);
+//    
+//    HAL_UART_DMAStop(&huart2);	//Stop DMA
+//    
+//    usart2_rx_len = USART2_RX_BUF_LEN - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);		//Get the rx_data length
+//	  
+//	/*result = (condition) ? (excute if condition is true) : (excute if condition is false);*/
+//    uint16_t copy_len = (usart2_rx_len < PROCESS_AREA_LEN - 1) ? usart2_rx_len : (PROCESS_AREA_LEN - 1);//Prevent overflow
+////    memcpy(process_area, usart2_rx_buf, copy_len);//Copy data to process area
 
-	process_area[copy_len] = '\0';
-	  
-	HAL_UART_Receive_DMA(&huart2, usart2_rx_buf, USART2_RX_BUF_LEN);
-	 
-    usart2_rx_flag += 1;//Set the receive flag
-  }
+////	process_area[copy_len] = '\0';
+//	  
+//	HAL_UART_Receive_DMA(&huart2, usart2_rx_buf, USART2_RX_BUF_LEN);
+//	 
+//    usart2_rx_flag += 1;//Set the receive flag
+//  }
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
 
   /* USER CODE END USART2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 stream1 global interrupt.
+  */
+void DMA2_Stream1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart6_rx);
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream1_IRQn 1 */
 }
 
 /**
@@ -339,6 +356,34 @@ void CAN2_RX1_IRQHandler(void)
   /* USER CODE BEGIN CAN2_RX1_IRQn 1 */
 
   /* USER CODE END CAN2_RX1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 stream6 global interrupt.
+  */
+void DMA2_Stream6_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream6_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream6_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart6_tx);
+  /* USER CODE BEGIN DMA2_Stream6_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream6_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART6 global interrupt.
+  */
+void USART6_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART6_IRQn 0 */
+
+  /* USER CODE END USART6_IRQn 0 */
+  HAL_UART_IRQHandler(&huart6);
+  /* USER CODE BEGIN USART6_IRQn 1 */
+
+  /* USER CODE END USART6_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

@@ -34,15 +34,19 @@ extern "C" {
 
 extern UART_HandleTypeDef huart2;
 
+extern UART_HandleTypeDef huart6;
+
 /* USER CODE BEGIN Private defines */
 extern uint8_t usart2_rx_buf[];
 extern uint8_t usart2_rx_flag;
 extern uint16_t usart2_rx_len;
+extern uint8_t usart6_rx_flag;
 	
 extern uint8_t process_area[];
 /* USER CODE END Private defines */
 
 void MX_USART2_UART_Init(void);
+void MX_USART6_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
